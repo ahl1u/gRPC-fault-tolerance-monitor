@@ -4,7 +4,11 @@ option go_package = "./proto";
 service FaultTolerant {
   rpc Execute(Request) returns (Response);
   rpc Stream(Request) returns (stream Response);
+  rpc Promote(PromoteRequest) returns (PromoteResponse);
 }
+
+message PromoteRequest {}
+message PromoteResponse {}
 
 message Request {
   string id = 1;

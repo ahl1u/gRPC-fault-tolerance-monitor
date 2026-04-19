@@ -21,6 +21,78 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type PromoteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PromoteRequest) Reset() {
+	*x = PromoteRequest{}
+	mi := &file_proto_service_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PromoteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PromoteRequest) ProtoMessage() {}
+
+func (x *PromoteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_service_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PromoteRequest.ProtoReflect.Descriptor instead.
+func (*PromoteRequest) Descriptor() ([]byte, []int) {
+	return file_proto_service_proto_rawDescGZIP(), []int{0}
+}
+
+type PromoteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PromoteResponse) Reset() {
+	*x = PromoteResponse{}
+	mi := &file_proto_service_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PromoteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PromoteResponse) ProtoMessage() {}
+
+func (x *PromoteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_service_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PromoteResponse.ProtoReflect.Descriptor instead.
+func (*PromoteResponse) Descriptor() ([]byte, []int) {
+	return file_proto_service_proto_rawDescGZIP(), []int{1}
+}
+
 type Request struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -31,7 +103,7 @@ type Request struct {
 
 func (x *Request) Reset() {
 	*x = Request{}
-	mi := &file_proto_service_proto_msgTypes[0]
+	mi := &file_proto_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +115,7 @@ func (x *Request) String() string {
 func (*Request) ProtoMessage() {}
 
 func (x *Request) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_service_proto_msgTypes[0]
+	mi := &file_proto_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +128,7 @@ func (x *Request) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Request.ProtoReflect.Descriptor instead.
 func (*Request) Descriptor() ([]byte, []int) {
-	return file_proto_service_proto_rawDescGZIP(), []int{0}
+	return file_proto_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Request) GetId() string {
@@ -84,7 +156,7 @@ type Response struct {
 
 func (x *Response) Reset() {
 	*x = Response{}
-	mi := &file_proto_service_proto_msgTypes[1]
+	mi := &file_proto_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -96,7 +168,7 @@ func (x *Response) String() string {
 func (*Response) ProtoMessage() {}
 
 func (x *Response) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_service_proto_msgTypes[1]
+	mi := &file_proto_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -109,7 +181,7 @@ func (x *Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Response.ProtoReflect.Descriptor instead.
 func (*Response) Descriptor() ([]byte, []int) {
-	return file_proto_service_proto_rawDescGZIP(), []int{1}
+	return file_proto_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Response) GetId() string {
@@ -137,7 +209,9 @@ var File_proto_service_proto protoreflect.FileDescriptor
 
 const file_proto_service_proto_rawDesc = "" +
 	"\n" +
-	"\x13proto/service.proto\"3\n" +
+	"\x13proto/service.proto\"\x10\n" +
+	"\x0ePromoteRequest\"\x11\n" +
+	"\x0fPromoteResponse\"3\n" +
 	"\aRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\apayload\x18\x02 \x01(\tR\apayload\"S\n" +
@@ -145,10 +219,11 @@ const file_proto_service_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06result\x18\x02 \x01(\tR\x06result\x12\x1f\n" +
 	"\vleader_addr\x18\x03 \x01(\tR\n" +
-	"leaderAddr2P\n" +
+	"leaderAddr2~\n" +
 	"\rFaultTolerant\x12\x1e\n" +
 	"\aExecute\x12\b.Request\x1a\t.Response\x12\x1f\n" +
-	"\x06Stream\x12\b.Request\x1a\t.Response0\x01B\tZ\a./protob\x06proto3"
+	"\x06Stream\x12\b.Request\x1a\t.Response0\x01\x12,\n" +
+	"\aPromote\x12\x0f.PromoteRequest\x1a\x10.PromoteResponseB\tZ\a./protob\x06proto3"
 
 var (
 	file_proto_service_proto_rawDescOnce sync.Once
@@ -162,18 +237,22 @@ func file_proto_service_proto_rawDescGZIP() []byte {
 	return file_proto_service_proto_rawDescData
 }
 
-var file_proto_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_proto_service_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_proto_service_proto_goTypes = []any{
-	(*Request)(nil),  // 0: Request
-	(*Response)(nil), // 1: Response
+	(*PromoteRequest)(nil),  // 0: PromoteRequest
+	(*PromoteResponse)(nil), // 1: PromoteResponse
+	(*Request)(nil),         // 2: Request
+	(*Response)(nil),        // 3: Response
 }
 var file_proto_service_proto_depIdxs = []int32{
-	0, // 0: FaultTolerant.Execute:input_type -> Request
-	0, // 1: FaultTolerant.Stream:input_type -> Request
-	1, // 2: FaultTolerant.Execute:output_type -> Response
-	1, // 3: FaultTolerant.Stream:output_type -> Response
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	2, // 0: FaultTolerant.Execute:input_type -> Request
+	2, // 1: FaultTolerant.Stream:input_type -> Request
+	0, // 2: FaultTolerant.Promote:input_type -> PromoteRequest
+	3, // 3: FaultTolerant.Execute:output_type -> Response
+	3, // 4: FaultTolerant.Stream:output_type -> Response
+	1, // 5: FaultTolerant.Promote:output_type -> PromoteResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -190,7 +269,7 @@ func file_proto_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_service_proto_rawDesc), len(file_proto_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

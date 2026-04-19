@@ -7,6 +7,11 @@ import (
 	"log"
 	"net"
 	"sync"
+	"time"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/metadata"
 
 	pb "github.com/ahl1u/gRPC-fault-tolerance-monitor/proto"
 	"google.golang.org/grpc"
@@ -14,6 +19,7 @@ import (
 
 var (
 	port = flag.Int("port", 50051, "The server port")
+	isLeader = flag.Bool("leader", false, "whether this server is leader currently")
 )
 
 type replyCache struct {
@@ -51,13 +57,39 @@ func serverInterceptor(cache *replyCache) grpc.UnaryServerInterceptor {
 	}
 }
 
+
 type server struct {
 	pb.UnimplementedFaultTolerantServer
+	mu       sync.Mutex
+	isLeader bool
 }
 
+func (s *server) Promote(ctx context.Context, req *pb.PromoteRequest) (*pb.PromoteResponse, error) {
+	s.mu.Lock()
+	s.isLeader = true
+	s.mu.Unlock()
+	return &pb.PromoteResponse{}, nil
+}
+
+
 func (s *server) Execute(ctx context.Context, req *pb.Request) (*pb.Response, error) {
+	if (!s.isLeader) {
+		header := metadata.Pairs("leader-addr", "localhost:50051")
+		grpc.SendHeader(ctx, header)
+		return nil, status.Error(codes.Unavailable, "not the leader")
+	}
 	log.Printf("received: %v", req.Payload)
 	return &pb.Response{Id: req.Id, Result: "ok"}, nil
+}
+
+func (s *server) Stream(req *pb.Request, stream pb.FaultTolerant_StreamServer) error {
+	for i := 0; i < 10; i++ {
+		if err := stream.Send(&pb.Response{Id: req.Id, Result: fmt.Sprintf("message %d", i)}); err != nil {
+			return err
+		}
+		time.Sleep(500*time.Millisecond)
+	}
+	return nil
 }
 
 func main() {
@@ -68,7 +100,7 @@ func main() {
 	}
 	cache := &replyCache{entries: make(map[string]*pb.Response)}
 	s := grpc.NewServer(grpc.UnaryInterceptor(serverInterceptor(cache)))
-	pb.RegisterFaultTolerantServer(s, &server{})
+	pb.RegisterFaultTolerantServer(s, &server{isLeader : *isLeader})
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

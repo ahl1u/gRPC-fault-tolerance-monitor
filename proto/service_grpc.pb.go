@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	FaultTolerant_Execute_FullMethodName = "/FaultTolerant/Execute"
 	FaultTolerant_Stream_FullMethodName  = "/FaultTolerant/Stream"
+	FaultTolerant_Promote_FullMethodName = "/FaultTolerant/Promote"
 )
 
 // FaultTolerantClient is the client API for FaultTolerant service.
@@ -29,6 +30,7 @@ const (
 type FaultTolerantClient interface {
 	Execute(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
 	Stream(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Response], error)
+	Promote(ctx context.Context, in *PromoteRequest, opts ...grpc.CallOption) (*PromoteResponse, error)
 }
 
 type faultTolerantClient struct {
@@ -68,12 +70,23 @@ func (c *faultTolerantClient) Stream(ctx context.Context, in *Request, opts ...g
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type FaultTolerant_StreamClient = grpc.ServerStreamingClient[Response]
 
+func (c *faultTolerantClient) Promote(ctx context.Context, in *PromoteRequest, opts ...grpc.CallOption) (*PromoteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PromoteResponse)
+	err := c.cc.Invoke(ctx, FaultTolerant_Promote_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FaultTolerantServer is the server API for FaultTolerant service.
 // All implementations must embed UnimplementedFaultTolerantServer
 // for forward compatibility.
 type FaultTolerantServer interface {
 	Execute(context.Context, *Request) (*Response, error)
 	Stream(*Request, grpc.ServerStreamingServer[Response]) error
+	Promote(context.Context, *PromoteRequest) (*PromoteResponse, error)
 	mustEmbedUnimplementedFaultTolerantServer()
 }
 
@@ -89,6 +102,9 @@ func (UnimplementedFaultTolerantServer) Execute(context.Context, *Request) (*Res
 }
 func (UnimplementedFaultTolerantServer) Stream(*Request, grpc.ServerStreamingServer[Response]) error {
 	return status.Error(codes.Unimplemented, "method Stream not implemented")
+}
+func (UnimplementedFaultTolerantServer) Promote(context.Context, *PromoteRequest) (*PromoteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Promote not implemented")
 }
 func (UnimplementedFaultTolerantServer) mustEmbedUnimplementedFaultTolerantServer() {}
 func (UnimplementedFaultTolerantServer) testEmbeddedByValue()                       {}
@@ -140,6 +156,24 @@ func _FaultTolerant_Stream_Handler(srv interface{}, stream grpc.ServerStream) er
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type FaultTolerant_StreamServer = grpc.ServerStreamingServer[Response]
 
+func _FaultTolerant_Promote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PromoteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FaultTolerantServer).Promote(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FaultTolerant_Promote_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FaultTolerantServer).Promote(ctx, req.(*PromoteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FaultTolerant_ServiceDesc is the grpc.ServiceDesc for FaultTolerant service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -150,6 +184,10 @@ var FaultTolerant_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Execute",
 			Handler:    _FaultTolerant_Execute_Handler,
+		},
+		{
+			MethodName: "Promote",
+			Handler:    _FaultTolerant_Promote_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
