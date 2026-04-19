@@ -2,6 +2,11 @@
 // the client retries, gets redirected to a new server, and rebinds. 
 // Clean failure, nothing was executed yet.
 
+// note that we only simulate leader death and the rebind that we retry
+// is with the two follower servers. in an ideal system, we would have automatic
+// leader election where we hit the dead server and get rerouted, but our current implementation
+// requires us to test the rebind/retry latency manually instead of getting automatic reelection.
+
 package scenarios
 
 import (
