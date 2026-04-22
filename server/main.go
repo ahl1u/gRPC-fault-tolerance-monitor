@@ -20,6 +20,7 @@ import (
 var (
 	port = flag.Int("port", 50051, "The server port")
 	isLeader = flag.Bool("leader", false, "whether this server is leader currently")
+	leaderAddr = flag.String("leader-addr", "localhost:50051", "current leader address")
 )
 
 type replyCache struct {
@@ -31,7 +32,11 @@ type replyCache struct {
 func serverInterceptor(cache *replyCache) grpc.UnaryServerInterceptor {
 	// Returns a function that gRPC will call on every incoming request
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-		r := req.(*pb.Request)
+		r, ok := req.(*pb.Request)
+
+		if !ok {
+			return handler(ctx, req)
+		}
 
 		// Lock the cache, look up request ID.
 		// If found, return cached response and exit.
@@ -62,6 +67,7 @@ type server struct {
 	pb.UnimplementedFaultTolerantServer
 	mu       sync.Mutex
 	isLeader bool
+	leaderAddr string
 }
 
 func (s *server) Promote(ctx context.Context, req *pb.PromoteRequest) (*pb.PromoteResponse, error) {
@@ -71,10 +77,22 @@ func (s *server) Promote(ctx context.Context, req *pb.PromoteRequest) (*pb.Promo
 	return &pb.PromoteResponse{}, nil
 }
 
+func (s *server) UpdateLeader(ctx context.Context, req *pb.UpdateLeaderRequest) (*pb.UpdateLeaderResponse, error) {
+    s.mu.Lock()
+    s.leaderAddr = req.NewLeaderAddr
+    s.mu.Unlock()
+    return &pb.UpdateLeaderResponse{}, nil
+}
+
 
 func (s *server) Execute(ctx context.Context, req *pb.Request) (*pb.Response, error) {
-	if (!s.isLeader) {
-		header := metadata.Pairs("leader-addr", "localhost:50051")
+	s.mu.Lock()
+	isLeader := s.isLeader
+	leaderAddr := s.leaderAddr
+	s.mu.Unlock()
+
+	if (!isLeader) {
+		header := metadata.Pairs("leader-addr", leaderAddr)
 		grpc.SendHeader(ctx, header)
 		return nil, status.Error(codes.Unavailable, "not the leader")
 	}
@@ -100,7 +118,7 @@ func main() {
 	}
 	cache := &replyCache{entries: make(map[string]*pb.Response)}
 	s := grpc.NewServer(grpc.UnaryInterceptor(serverInterceptor(cache)))
-	pb.RegisterFaultTolerantServer(s, &server{isLeader : *isLeader})
+	pb.RegisterFaultTolerantServer(s, &server{isLeader : *isLeader, leaderAddr: *leaderAddr,})
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

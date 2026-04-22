@@ -5,7 +5,13 @@ service FaultTolerant {
   rpc Execute(Request) returns (Response);
   rpc Stream(Request) returns (stream Response);
   rpc Promote(PromoteRequest) returns (PromoteResponse);
+  rpc UpdateLeader(UpdateLeaderRequest) returns (UpdateLeaderResponse);
 }
+
+message UpdateLeaderRequest {
+    string new_leader_addr = 1;
+}
+message UpdateLeaderResponse {}
 
 message PromoteRequest {}
 message PromoteResponse {}

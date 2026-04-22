@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	FaultTolerant_Execute_FullMethodName = "/FaultTolerant/Execute"
-	FaultTolerant_Stream_FullMethodName  = "/FaultTolerant/Stream"
-	FaultTolerant_Promote_FullMethodName = "/FaultTolerant/Promote"
+	FaultTolerant_Execute_FullMethodName      = "/FaultTolerant/Execute"
+	FaultTolerant_Stream_FullMethodName       = "/FaultTolerant/Stream"
+	FaultTolerant_Promote_FullMethodName      = "/FaultTolerant/Promote"
+	FaultTolerant_UpdateLeader_FullMethodName = "/FaultTolerant/UpdateLeader"
 )
 
 // FaultTolerantClient is the client API for FaultTolerant service.
@@ -31,6 +32,7 @@ type FaultTolerantClient interface {
 	Execute(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
 	Stream(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Response], error)
 	Promote(ctx context.Context, in *PromoteRequest, opts ...grpc.CallOption) (*PromoteResponse, error)
+	UpdateLeader(ctx context.Context, in *UpdateLeaderRequest, opts ...grpc.CallOption) (*UpdateLeaderResponse, error)
 }
 
 type faultTolerantClient struct {
@@ -80,6 +82,16 @@ func (c *faultTolerantClient) Promote(ctx context.Context, in *PromoteRequest, o
 	return out, nil
 }
 
+func (c *faultTolerantClient) UpdateLeader(ctx context.Context, in *UpdateLeaderRequest, opts ...grpc.CallOption) (*UpdateLeaderResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateLeaderResponse)
+	err := c.cc.Invoke(ctx, FaultTolerant_UpdateLeader_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FaultTolerantServer is the server API for FaultTolerant service.
 // All implementations must embed UnimplementedFaultTolerantServer
 // for forward compatibility.
@@ -87,6 +99,7 @@ type FaultTolerantServer interface {
 	Execute(context.Context, *Request) (*Response, error)
 	Stream(*Request, grpc.ServerStreamingServer[Response]) error
 	Promote(context.Context, *PromoteRequest) (*PromoteResponse, error)
+	UpdateLeader(context.Context, *UpdateLeaderRequest) (*UpdateLeaderResponse, error)
 	mustEmbedUnimplementedFaultTolerantServer()
 }
 
@@ -105,6 +118,9 @@ func (UnimplementedFaultTolerantServer) Stream(*Request, grpc.ServerStreamingSer
 }
 func (UnimplementedFaultTolerantServer) Promote(context.Context, *PromoteRequest) (*PromoteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Promote not implemented")
+}
+func (UnimplementedFaultTolerantServer) UpdateLeader(context.Context, *UpdateLeaderRequest) (*UpdateLeaderResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateLeader not implemented")
 }
 func (UnimplementedFaultTolerantServer) mustEmbedUnimplementedFaultTolerantServer() {}
 func (UnimplementedFaultTolerantServer) testEmbeddedByValue()                       {}
@@ -174,6 +190,24 @@ func _FaultTolerant_Promote_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FaultTolerant_UpdateLeader_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateLeaderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FaultTolerantServer).UpdateLeader(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FaultTolerant_UpdateLeader_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FaultTolerantServer).UpdateLeader(ctx, req.(*UpdateLeaderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FaultTolerant_ServiceDesc is the grpc.ServiceDesc for FaultTolerant service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -188,6 +222,10 @@ var FaultTolerant_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Promote",
 			Handler:    _FaultTolerant_Promote_Handler,
+		},
+		{
+			MethodName: "UpdateLeader",
+			Handler:    _FaultTolerant_UpdateLeader_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

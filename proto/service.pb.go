@@ -21,6 +21,86 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateLeaderRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NewLeaderAddr string                 `protobuf:"bytes,1,opt,name=new_leader_addr,json=newLeaderAddr,proto3" json:"new_leader_addr,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateLeaderRequest) Reset() {
+	*x = UpdateLeaderRequest{}
+	mi := &file_proto_service_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateLeaderRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateLeaderRequest) ProtoMessage() {}
+
+func (x *UpdateLeaderRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_service_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateLeaderRequest.ProtoReflect.Descriptor instead.
+func (*UpdateLeaderRequest) Descriptor() ([]byte, []int) {
+	return file_proto_service_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateLeaderRequest) GetNewLeaderAddr() string {
+	if x != nil {
+		return x.NewLeaderAddr
+	}
+	return ""
+}
+
+type UpdateLeaderResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateLeaderResponse) Reset() {
+	*x = UpdateLeaderResponse{}
+	mi := &file_proto_service_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateLeaderResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateLeaderResponse) ProtoMessage() {}
+
+func (x *UpdateLeaderResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_service_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateLeaderResponse.ProtoReflect.Descriptor instead.
+func (*UpdateLeaderResponse) Descriptor() ([]byte, []int) {
+	return file_proto_service_proto_rawDescGZIP(), []int{1}
+}
+
 type PromoteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -29,7 +109,7 @@ type PromoteRequest struct {
 
 func (x *PromoteRequest) Reset() {
 	*x = PromoteRequest{}
-	mi := &file_proto_service_proto_msgTypes[0]
+	mi := &file_proto_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -41,7 +121,7 @@ func (x *PromoteRequest) String() string {
 func (*PromoteRequest) ProtoMessage() {}
 
 func (x *PromoteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_service_proto_msgTypes[0]
+	mi := &file_proto_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -54,7 +134,7 @@ func (x *PromoteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PromoteRequest.ProtoReflect.Descriptor instead.
 func (*PromoteRequest) Descriptor() ([]byte, []int) {
-	return file_proto_service_proto_rawDescGZIP(), []int{0}
+	return file_proto_service_proto_rawDescGZIP(), []int{2}
 }
 
 type PromoteResponse struct {
@@ -65,7 +145,7 @@ type PromoteResponse struct {
 
 func (x *PromoteResponse) Reset() {
 	*x = PromoteResponse{}
-	mi := &file_proto_service_proto_msgTypes[1]
+	mi := &file_proto_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -77,7 +157,7 @@ func (x *PromoteResponse) String() string {
 func (*PromoteResponse) ProtoMessage() {}
 
 func (x *PromoteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_service_proto_msgTypes[1]
+	mi := &file_proto_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -90,7 +170,7 @@ func (x *PromoteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PromoteResponse.ProtoReflect.Descriptor instead.
 func (*PromoteResponse) Descriptor() ([]byte, []int) {
-	return file_proto_service_proto_rawDescGZIP(), []int{1}
+	return file_proto_service_proto_rawDescGZIP(), []int{3}
 }
 
 type Request struct {
@@ -103,7 +183,7 @@ type Request struct {
 
 func (x *Request) Reset() {
 	*x = Request{}
-	mi := &file_proto_service_proto_msgTypes[2]
+	mi := &file_proto_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -115,7 +195,7 @@ func (x *Request) String() string {
 func (*Request) ProtoMessage() {}
 
 func (x *Request) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_service_proto_msgTypes[2]
+	mi := &file_proto_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -128,7 +208,7 @@ func (x *Request) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Request.ProtoReflect.Descriptor instead.
 func (*Request) Descriptor() ([]byte, []int) {
-	return file_proto_service_proto_rawDescGZIP(), []int{2}
+	return file_proto_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Request) GetId() string {
@@ -156,7 +236,7 @@ type Response struct {
 
 func (x *Response) Reset() {
 	*x = Response{}
-	mi := &file_proto_service_proto_msgTypes[3]
+	mi := &file_proto_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -168,7 +248,7 @@ func (x *Response) String() string {
 func (*Response) ProtoMessage() {}
 
 func (x *Response) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_service_proto_msgTypes[3]
+	mi := &file_proto_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -181,7 +261,7 @@ func (x *Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Response.ProtoReflect.Descriptor instead.
 func (*Response) Descriptor() ([]byte, []int) {
-	return file_proto_service_proto_rawDescGZIP(), []int{3}
+	return file_proto_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Response) GetId() string {
@@ -209,7 +289,10 @@ var File_proto_service_proto protoreflect.FileDescriptor
 
 const file_proto_service_proto_rawDesc = "" +
 	"\n" +
-	"\x13proto/service.proto\"\x10\n" +
+	"\x13proto/service.proto\"=\n" +
+	"\x13UpdateLeaderRequest\x12&\n" +
+	"\x0fnew_leader_addr\x18\x01 \x01(\tR\rnewLeaderAddr\"\x16\n" +
+	"\x14UpdateLeaderResponse\"\x10\n" +
 	"\x0ePromoteRequest\"\x11\n" +
 	"\x0fPromoteResponse\"3\n" +
 	"\aRequest\x12\x0e\n" +
@@ -219,11 +302,12 @@ const file_proto_service_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06result\x18\x02 \x01(\tR\x06result\x12\x1f\n" +
 	"\vleader_addr\x18\x03 \x01(\tR\n" +
-	"leaderAddr2~\n" +
+	"leaderAddr2\xbb\x01\n" +
 	"\rFaultTolerant\x12\x1e\n" +
 	"\aExecute\x12\b.Request\x1a\t.Response\x12\x1f\n" +
 	"\x06Stream\x12\b.Request\x1a\t.Response0\x01\x12,\n" +
-	"\aPromote\x12\x0f.PromoteRequest\x1a\x10.PromoteResponseB\tZ\a./protob\x06proto3"
+	"\aPromote\x12\x0f.PromoteRequest\x1a\x10.PromoteResponse\x12;\n" +
+	"\fUpdateLeader\x12\x14.UpdateLeaderRequest\x1a\x15.UpdateLeaderResponseB\tZ\a./protob\x06proto3"
 
 var (
 	file_proto_service_proto_rawDescOnce sync.Once
@@ -237,22 +321,26 @@ func file_proto_service_proto_rawDescGZIP() []byte {
 	return file_proto_service_proto_rawDescData
 }
 
-var file_proto_service_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_proto_service_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_proto_service_proto_goTypes = []any{
-	(*PromoteRequest)(nil),  // 0: PromoteRequest
-	(*PromoteResponse)(nil), // 1: PromoteResponse
-	(*Request)(nil),         // 2: Request
-	(*Response)(nil),        // 3: Response
+	(*UpdateLeaderRequest)(nil),  // 0: UpdateLeaderRequest
+	(*UpdateLeaderResponse)(nil), // 1: UpdateLeaderResponse
+	(*PromoteRequest)(nil),       // 2: PromoteRequest
+	(*PromoteResponse)(nil),      // 3: PromoteResponse
+	(*Request)(nil),              // 4: Request
+	(*Response)(nil),             // 5: Response
 }
 var file_proto_service_proto_depIdxs = []int32{
-	2, // 0: FaultTolerant.Execute:input_type -> Request
-	2, // 1: FaultTolerant.Stream:input_type -> Request
-	0, // 2: FaultTolerant.Promote:input_type -> PromoteRequest
-	3, // 3: FaultTolerant.Execute:output_type -> Response
-	3, // 4: FaultTolerant.Stream:output_type -> Response
-	1, // 5: FaultTolerant.Promote:output_type -> PromoteResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	4, // 0: FaultTolerant.Execute:input_type -> Request
+	4, // 1: FaultTolerant.Stream:input_type -> Request
+	2, // 2: FaultTolerant.Promote:input_type -> PromoteRequest
+	0, // 3: FaultTolerant.UpdateLeader:input_type -> UpdateLeaderRequest
+	5, // 4: FaultTolerant.Execute:output_type -> Response
+	5, // 5: FaultTolerant.Stream:output_type -> Response
+	3, // 6: FaultTolerant.Promote:output_type -> PromoteResponse
+	1, // 7: FaultTolerant.UpdateLeader:output_type -> UpdateLeaderResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -269,7 +357,7 @@ func file_proto_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_service_proto_rawDesc), len(file_proto_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
