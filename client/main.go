@@ -3,15 +3,15 @@ package main
 import (
 	"context"
 	"flag"
+	"io"
 	"log"
 	"time"
-	"io"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/ahl1u/gRPC-fault-tolerance-monitor/proto"
 )
@@ -19,7 +19,6 @@ import (
 var (
 	addr = flag.String("addr", "localhost:50051", "the address to connect to")
 	mode = flag.String("mode", "unary", "unary or stream")
-
 )
 
 const maxCalls = 3
@@ -63,12 +62,12 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 
 type retryStream struct {
 	grpc.ClientStream
-	ctx			context.Context
-	desc		*grpc.StreamDesc
-	cc			*grpc.ClientConn
-	method		string
-	streamer	grpc.Streamer
-	opts		[]grpc.CallOption
+	ctx      context.Context
+	desc     *grpc.StreamDesc
+	cc       *grpc.ClientConn
+	method   string
+	streamer grpc.Streamer
+	opts     []grpc.CallOption
 }
 
 func (s *retryStream) RecvMsg(m any) error {
@@ -100,13 +99,13 @@ func StreamClientInterceptor() grpc.StreamClientInterceptor {
 		}
 		return &retryStream{
 			ClientStream: stream,
-            ctx:          ctx,
-            desc:         desc,
-            cc:           cc,
-            method:       method,
-            streamer:     streamer,
-            opts:         opts,
-        }, nil
+			ctx:          ctx,
+			desc:         desc,
+			cc:           cc,
+			method:       method,
+			streamer:     streamer,
+			opts:         opts,
+		}, nil
 	}
 }
 
@@ -126,10 +125,10 @@ func main() {
 	c := pb.NewFaultTolerantClient(conn)
 
 	// Contact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	switch * mode {
+	switch *mode {
 	case "stream":
 		stream, err := c.Stream(ctx, &pb.Request{Id: "1", Payload: "mr kim"})
 		if err != nil {
@@ -146,7 +145,7 @@ func main() {
 			}
 			log.Printf("response: %v", resp.GetResult())
 		}
-	default: 
+	default:
 		resp, err := c.Execute(ctx, &pb.Request{Id: "1", Payload: "mr kim"})
 		if err != nil {
 			log.Fatalf("error: %v", err)
