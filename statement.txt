@@ -1,0 +1,10 @@
+We used Claude (Anthropic) as an AI assistant for this project. Specifically:
+
+- Go syntax and idioms
+- Interceptor logic structure and ordering
+- Debugging code and refining our scenario tests
+- Fixing latency measurement issues(precompiled binary vs go run)
+- Command line help (port cleanup, running tests)
+- Help articulating architecture and limitations in documentation in README
+
+All core architectural decisions, failure scenarios, proto design, and system design  were our own. 
