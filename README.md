@@ -101,7 +101,7 @@ leader-aware failover semantics.
 |---|---|---|
 | 4 | Unary baseline (no failures) | 40ms |
 | 2 | Cache hit (no re-execution) | 20ms |
-| 1 | Redirect + retry after leader death | 486ms |
+| 1 | Redirect + retry after leader death (likely machine dependent) | 486ms |
 | 5 | Stream baseline (no failures) | 5.07s |
 | 3 | Stream reconnect (mid-stream failure) | 5.09s |
 
