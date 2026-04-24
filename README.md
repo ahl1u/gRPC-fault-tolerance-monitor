@@ -1,127 +1,135 @@
 # gRPC Fault-Tolerant Service
-Andrew Liu, Hannah Wang, Christopher Kim
+**Andrew Liu, Hannah Wang, Christopher Kim**
 
 ## Overview
-
 This project implements a fault-tolerant gRPC service in Go that explores how
-distributed systems handle partial failure. The core problem we investigate is:
-what happens when a leader server dies mid-request? We build a leader-follower
-cluster and implement two layers of fault tolerance: automatic client-side retry
-with leader redirect, and server-side exactly-once semantics via a reply cache,
-then measure the latency cost of each recovery path across five scenarios.
+distributed systems handle partial failure. The system uses a leader-follower
+architecture for unary requests and demonstrates two recovery mechanisms:
+client-side retry with leader redirect, and server-side deduplication through
+a reply cache. We evaluate the latency impact of normal execution,
+redirect-based recovery, cached retries, and streaming behavior across five
+scenarios.
 
 ## Architecture
-
-The system follows a leader-follower model. One server is designated the leader
-and is the only server that processes requests. Follower servers exist to redirect
-clients to the leader. When a client hits a follower, the follower returns an
-UNAVAILABLE error with the leader's address embedded in the response metadata.
-The client interceptor reads this metadata and transparently replays the request
-to the correct server.
+The system follows a leader-follower model. For unary Execute requests, one
+server is designated the leader and is the only server that processes the
+request. Follower servers do not execute unary requests; instead, they return
+an UNAVAILABLE error and include the current leader's address in gRPC response
+metadata. The client interceptor reads this metadata and transparently retries
+the request against the leader.
 
 There is no automatic leader election in this implementation. Failover is
-simulated manually in tests by killing the leader process, promoting a follower
-via the Promote RPC, and updating other followers via the UpdateLeader RPC. This
-is an intentional simplification — the interesting behavior we are studying is
-the client recovery path, not the election mechanism itself. A production system
-would use a consensus protocol like Raft to handle this automatically.
+simulated manually in tests by promoting a follower with the Promote RPC and
+updating follower redirect targets with the UpdateLeader RPC. This is an
+intentional simplification: the focus of the project is the client recovery
+path and deduplication behavior, not consensus or election.
 
-The proto contract defines three core RPCs: Execute (unary), Stream
-(server-streaming), and Promote (promotes a server to leader), plus UpdateLeader
-for dynamically updating a follower's redirect target.
+The proto contract defines four RPCs: Execute (unary), Stream
+(server-streaming), Promote, and UpdateLeader.
 
 ## Client Interceptors
+The client includes two interceptors that make retry behavior transparent to
+the application.
 
-The client has two interceptors that handle fault tolerance transparently — the
-application code that calls Execute or Stream never needs to know about failures
-or retries.
+The **UnaryClientInterceptor** wraps every Execute call. If it receives an
+UNAVAILABLE error, it checks the response headers for a leader-addr value. If
+that metadata is present, it opens a new connection to the reported leader and
+retries the same request. If no redirect hint is present, it waits briefly and
+retries the same server. This loop runs up to three times.
 
-The UnaryClientInterceptor wraps every Execute call. On an UNAVAILABLE error it
-checks the response metadata for a leader-addr field. If present, it opens a new
-connection to that address and replays the request. If not present, it retries
-the same server. This loop runs up to three times, resetting the header on each
-attempt to avoid using stale redirect addresses.
+The **StreamClientInterceptor** wraps streaming RPCs by returning a custom
+retryStream. This wrapper overrides RecvMsg(). If RecvMsg() returns
+UNAVAILABLE, the interceptor creates a new stream on the same client connection
+and swaps it in so the application can continue calling Recv(). Unlike the
+unary interceptor, the streaming interceptor does not inspect leader metadata
+or redirect to a different server.
 
-The StreamClientInterceptor wraps every Stream call by returning a retryStream
-struct instead of the raw gRPC stream. The retryStream overrides RecvMsg — when
-the application calls Recv(), gRPC internally calls RecvMsg(). If RecvMsg gets
-an UNAVAILABLE error, the interceptor silently opens a new stream and swaps it
-in, returning nil instead of the error. The application never sees the failure
-and continues calling Recv() normally.
+## Server Interceptor
+The server includes a unary interceptor that implements a reply cache for
+deduplication. For each unary request, the interceptor checks the request ID
+in an in-memory map. On a cache hit, it returns the stored response immediately
+without calling the handler. On a cache miss, it runs the handler, stores the
+response, and returns it.
 
-## Server Interceptors
+This prevents duplicate execution when the same unary request is sent twice to
+the same running server. It demonstrates deduplication behavior, but it is not
+a full exactly-once guarantee across crashes or leader failover, since the cache
+is only stored in memory on one server.
 
-The server has one interceptor: a reply cache that implements exactly-once
-semantics. Every incoming unary request passes through this interceptor before
-reaching the handler. The interceptor checks the request ID against an in-memory
-map. On a cache hit, it returns the stored response immediately without calling
-the handler. On a cache miss, it calls the handler, stores the result, and
-returns it.
+A background garbage-collection goroutine runs every 30 seconds and evicts
+cache entries older than 5 minutes.
 
-This prevents double execution when a client retries: if the leader executed a
-request and then crashed before responding, the client will retry with the same
-request ID and get the cached result without the operation running again.
-
-The cache includes a background garbage collection goroutine that runs every 30
-seconds and evicts entries older than 5 minutes. This bounds memory usage in
-long-running servers while still covering any realistic retry window.
-
-The limitation of this implementation is that the cache is in-memory per server.
-It does not survive a crash or transfer to a new leader. In a production system
-you would replicate the cache across all nodes using a consensus protocol so the
-guarantee holds across leader failover. Our implementation demonstrates the
-deduplication mechanism works correctly; the replication layer is out of scope.
+## Important Limitation
+The reply cache is per-server and in-memory only. If a server actually crashes,
+its cache is lost. Because of that, the current implementation only guarantees
+deduplication for repeated requests reaching the same live server process. A
+production system would need replicated state, likely through a consensus
+protocol such as Raft, to preserve this property across failover.
 
 ## Failure Scenarios
+We test five scenarios. To reduce measurement noise, the scenario tests invoke
+a precompiled client binary.
 
-We test five scenarios. All latency measurements use a precompiled client binary
-to avoid Go compilation overhead skewing the numbers.
+**Scenario 4** is the unary baseline: the client sends a unary request directly
+to the leader with no failure or redirect.
 
-Scenario 4 is the unary baseline: client connects directly to the leader with no
-failures. This gives us a floor of 40ms for a local gRPC round trip.
+**Scenario 5** is the stream baseline: the client receives 10 stream messages
+with 500ms spacing, for a total duration of about 5 seconds.
 
-Scenario 5 is the stream baseline: client streams all 10 messages from the leader
-with no failures. Takes 5.07 seconds: 10 messages at 500ms intervals.
+**Scenario 1** simulates redirect-based unary recovery. The original leader is
+stopped, a follower is promoted, and another follower is updated with the new
+leader address. The client then contacts that follower, receives a redirect, and
+retries successfully against the promoted leader. This scenario measures
+follower redirect plus client retry, not direct recovery from initially dialing
+a dead leader.
 
-Scenario 1 tests leader death before execution. The leader is killed before the
-client sends its request. The client hits a follower, gets redirected to the new
-leader, and completes successfully. Recovery takes 486ms: significantly higher
-than baseline due to TCP connection timeout overhead from the killed server's port
-not being immediately released by the OS. In production with heartbeat-based
-failure detection this would be much closer to baseline.
+**Scenario 2** demonstrates reply-cache deduplication. The same unary request
+ID is sent twice to the same server. The first request executes normally. The
+second request hits the cache and returns the stored response without invoking
+the handler again.
 
-Scenario 2 tests exactly-once semantics. The same request ID is sent to the same
-server twice. The first call executes and caches the result: server logs show
-"received: mr kim". The second call hits the cache: server logs show "cache hit
-for id=1, skipping execution". The second call takes 20ms, slightly faster than
-baseline because the cache returns before the handler is ever invoked.
+**Scenario 3** is intended to test stream behavior during a leader failure. The
+client begins a stream, and the test attempts to stop the original leader
+mid-stream and promote a follower. However, the current stream implementation
+does not enforce leader-only execution or redirect via leader metadata. The
+streaming path therefore demonstrates reconnect behavior more than true
+leader-aware failover semantics.
 
-Scenario 3 tests leader death mid-stream. The leader is killed 2.5 seconds into
-a 5-second stream. The stream interceptor catches UNAVAILABLE on RecvMsg, opens
-a new stream, and swaps it in. The application code never sees an error. Total
-time is 5.09 seconds: only 20ms more than the stream baseline, showing the
-reconnect overhead is essentially negligible.
+## Results
 
-## Results Summary
-
-| Scenario | Time | Overhead vs Baseline |
+| Scenario | Description | Time |
 |---|---|---|
-| 4 — unary baseline | 40ms | 0ms |
-| 2 — cache hit | 25ms | faster (shorter code path) |
-| 1 — redirect + retry | 486ms | +446ms |
-| 5 — stream baseline | 5.07s | 0ms |
-| 3 — stream reconnect | 5.09s | +20ms |
+| 4 | Unary baseline (no failures) | 40ms |
+| 2 | Cache hit (no re-execution) | 20ms |
+| 1 | Redirect + retry after leader death | 486ms |
+| 5 | Stream baseline (no failures) | 5.07s |
+| 3 | Stream reconnect (mid-stream failure) | 5.09s |
+
+The unary baseline and cache-hit scenarios show that the normal unary path is
+fast and that cache hits avoid handler execution. The redirect scenario adds
+overhead from retrying through a follower before reaching the current leader.
+The streaming baseline takes about 5 seconds because the server sends 10
+messages at 500ms intervals. The stream recovery scenario shows little
+additional latency, but this should be interpreted carefully because the stream
+path does not currently implement the same leader-redirect logic as unary
+requests.
 
 ## Limitations and Future Work
+The main limitation is that the reply cache is not replicated, so deduplication
+does not survive server crashes or leader failover. Leader election is also
+manual; adding heartbeat-based failure detection and automatic election would
+make the system substantially more realistic.
 
-The primary limitation is the in-memory reply cache. Replicating it across nodes
-using Raft would enable true exactly-once guarantees across leader failover.
-Additionally, leader election is manual in this implementation — adding automatic
-heartbeat-based failure detection and election would make the system production-ready.
-Stream reconnect does not replay already-received messages, which means a
-reconnected stream starts fresh rather than resuming. Finally, all request IDs
-are hardcoded to "1" in this implementation; a real system would generate unique
-UUIDs per request.
+The streaming path is another important limitation. Stream does not currently
+check whether the server is leader, and the stream interceptor reconnects only
+on the same client connection rather than redirecting to a new leader. A
+stronger implementation would make streaming follow the same leader-aware
+semantics as unary requests and would define whether reconnect should restart
+the stream or resume from the last delivered message.
+
+Finally, request IDs are currently hardcoded to "1" in the client. A real
+system would generate unique request IDs, such as UUIDs, for each logical
+operation.
 
 ## Running the Tests
 
