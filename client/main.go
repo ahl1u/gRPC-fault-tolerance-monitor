@@ -27,7 +27,10 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		var lastErr error
 		var header metadata.MD
+
 		for attempt := uint(0); attempt < maxCalls; attempt++ {
+			// reset header each attempt
+			header = metadata.MD{}
 			lastErr = invoker(ctx, method, req, reply, cc, append(opts, grpc.Header(&header))...)
 			if lastErr == nil {
 				return nil
@@ -42,21 +45,27 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 			case codes.Unavailable:
 				vals := header["leader-addr"]
 				if len(vals) > 0 {
+					// server told us who the leader is, redirect
 					newAddr := vals[0]
+					log.Printf("redirecting to leader at %s (attempt %d)", newAddr, attempt+1)
 					conn, err := grpc.NewClient(newAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 					if err != nil {
 						return err
 					}
 					defer conn.Close()
-					return invoker(ctx, method, req, reply, conn, opts...)
+					// update cc for future retries too
+					cc = conn
+					continue // retry with new connection instead of returning immediately
 				}
+				// no redirect hint, wait briefly and retry same server
+				log.Printf("unavailable, no redirect hint, retrying (attempt %d)", attempt+1)
+				time.Sleep(100 * time.Millisecond)
 				continue
 			default:
 				return lastErr
 			}
 		}
 		return lastErr
-
 	}
 }
 
