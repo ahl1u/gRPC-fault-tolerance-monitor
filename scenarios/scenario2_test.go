@@ -18,7 +18,7 @@ func TestScenario2_ReplyCache(t *testing.T) {
 
 	// First request — leader executes it.
 	// Server log will show: "received: mr kim"
-	out, err := exec.Command("go", "run", "../client/main.go",
+	out, err := exec.Command("./client_bin",
 		"-addr=localhost:50051",
 		"-mode=unary",
 	).Output()
@@ -31,7 +31,7 @@ func TestScenario2_ReplyCache(t *testing.T) {
 	// Server log will show: "cache hit for id=1, skipping execution"
 	// NOT "received: mr kim" — proving no double execution.
 	start := time.Now()
-	out, err = exec.Command("go", "run", "../client/main.go",
+	out, err = exec.Command("./client_bin",
 		"-addr=localhost:50051",
 		"-mode=unary",
 	).Output()

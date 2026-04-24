@@ -30,7 +30,7 @@ func TestScenario3_LeaderDiesMidStream(t *testing.T) {
 	}()
 
 	start := time.Now()
-	out, err := exec.Command("go", "run", "../client/main.go",
+	out, err := exec.Command("./client_bin",
 		"-addr=localhost:50051",
 		"-mode=stream",
 	).Output()

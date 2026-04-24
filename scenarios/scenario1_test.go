@@ -29,7 +29,7 @@ func TestScenario1_LeaderDiesBeforeExecution(t *testing.T) {
 	updateLeader(t, "localhost:50053", "localhost:50052")
 
 	start := time.Now()
-    out, err := exec.Command("go", "run", "../client/main.go",
+    out, err := exec.Command("./client_bin",
         "-addr=localhost:50053",
         "-mode=unary",
     ).Output()
