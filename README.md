@@ -99,11 +99,11 @@ leader-aware failover semantics.
 
 | Scenario | Description | Time |
 |---|---|---|
-| 4 | Unary baseline (no failures) | 40ms |
-| 2 | Cache hit (no re-execution) | 20ms |
 | 1 | Redirect + retry after leader death (likely machine dependent) | 486ms |
-| 5 | Stream baseline (no failures) | 5.07s |
+| 2 | Cache hit (no re-execution) | 20ms |
 | 3 | Stream reconnect (mid-stream failure) | 5.09s |
+| 4 | Unary baseline (no failures) | 40ms |
+| 5 | Stream baseline (no failures) | 5.07s |
 
 Note: Scenario 1’s latency is less stable than the other measurements because it depends on local process teardown and port cleanup timing. After the original leader is stopped, the OS may not release the port immediately, which can introduce extra delay that is unrelated to the redirect logic itself. As a result, this scenario should be interpreted as an approximate recovery-path measurement rather than a precise benchmark of redirect overhead
 
