@@ -105,6 +105,8 @@ leader-aware failover semantics.
 | 5 | Stream baseline (no failures) | 5.07s |
 | 3 | Stream reconnect (mid-stream failure) | 5.09s |
 
+Note: Scenario 1’s latency is less stable than the other measurements because it depends on local process teardown and port cleanup timing. After the original leader is stopped, the OS may not release the port immediately, which can introduce extra delay that is unrelated to the redirect logic itself. As a result, this scenario should be interpreted as an approximate recovery-path measurement rather than a precise benchmark of redirect overhead
+
 The unary baseline and cache-hit scenarios show that the normal unary path is
 fast and that cache hits avoid handler execution. The redirect scenario adds
 overhead from retrying through a follower before reaching the current leader.
