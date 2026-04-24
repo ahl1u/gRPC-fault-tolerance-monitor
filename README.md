@@ -66,6 +66,9 @@ deduplication for repeated requests reaching the same live server process. A
 production system would need replicated state, likely through a consensus
 protocol such as Raft, to preserve this property across failover.
 
+Moreover, the garbage collection is using a time based heuristic to remove 
+data whereas a production-grade system would likely require some communication with client to determine whether message has been receieved.
+
 ## Failure Scenarios
 We test five scenarios. To reduce measurement noise, the scenario tests invoke
 a precompiled client binary.
