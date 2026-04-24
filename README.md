@@ -107,7 +107,7 @@ reconnect overhead is essentially negligible.
 | Scenario | Time | Overhead vs Baseline |
 |---|---|---|
 | 4 — unary baseline | 40ms | 0ms |
-| 2 — cache hit | 20ms | faster (shorter code path) |
+| 2 — cache hit | 25ms | faster (shorter code path) |
 | 1 — redirect + retry | 486ms | +446ms |
 | 5 — stream baseline | 5.07s | 0ms |
 | 3 — stream reconnect | 5.09s | +20ms |
