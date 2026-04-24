@@ -81,25 +81,25 @@ Scenario 4 is the unary baseline: client connects directly to the leader with no
 failures. This gives us a floor of 40ms for a local gRPC round trip.
 
 Scenario 5 is the stream baseline: client streams all 10 messages from the leader
-with no failures. Takes 5.07 seconds — 10 messages at 500ms intervals.
+with no failures. Takes 5.07 seconds: 10 messages at 500ms intervals.
 
 Scenario 1 tests leader death before execution. The leader is killed before the
 client sends its request. The client hits a follower, gets redirected to the new
-leader, and completes successfully. Recovery takes 486ms — significantly higher
+leader, and completes successfully. Recovery takes 486ms: significantly higher
 than baseline due to TCP connection timeout overhead from the killed server's port
 not being immediately released by the OS. In production with heartbeat-based
 failure detection this would be much closer to baseline.
 
 Scenario 2 tests exactly-once semantics. The same request ID is sent to the same
-server twice. The first call executes and caches the result — server logs show
-"received: mr kim". The second call hits the cache — server logs show "cache hit
+server twice. The first call executes and caches the result: server logs show
+"received: mr kim". The second call hits the cache: server logs show "cache hit
 for id=1, skipping execution". The second call takes 20ms, slightly faster than
 baseline because the cache returns before the handler is ever invoked.
 
 Scenario 3 tests leader death mid-stream. The leader is killed 2.5 seconds into
 a 5-second stream. The stream interceptor catches UNAVAILABLE on RecvMsg, opens
 a new stream, and swaps it in. The application code never sees an error. Total
-time is 5.09 seconds — only 20ms more than the stream baseline, showing the
+time is 5.09 seconds: only 20ms more than the stream baseline, showing the
 reconnect overhead is essentially negligible.
 
 ## Results Summary
